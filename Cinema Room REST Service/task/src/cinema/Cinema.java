@@ -1,10 +1,12 @@
 package cinema;
 
+import java.util.*;
+
 public class Cinema {
     public int total_rows;
     public int total_columns;
 
-    public Seat[] available_seats;
+    public List<Seat> available_seats;
 
 
     public Cinema() {}
@@ -12,14 +14,11 @@ public class Cinema {
     public Cinema(int rows, int columns) {
         this.total_rows = rows;
         this.total_columns = columns;
-        this.available_seats = new Seat[rows * columns];
+        this.available_seats = new ArrayList<>();
 
-
-        int counter = 0;
-        for (int i = 0; i < total_rows; i++) {
-            for (int j = 0; j < total_columns; j++) {
-                available_seats[counter] = new Seat(i, j);
-                counter++;
+        for (int i = 1; i <= total_rows; i++) {
+            for (int j = 1; j <= total_columns; j++) {
+                available_seats.add(new Seat(i, j));
             }
         }
     }
@@ -41,11 +40,11 @@ public class Cinema {
         this.total_columns = total_columns;
     }
 
-    public Seat[] getAvailable_seats() {
+    public List<Seat> getAvailable_seats() {
         return available_seats;
     }
 
-    public void setAvailable_seats(Seat[] available_seats) {
+    public void setAvailable_seats(List<Seat> available_seats) {
         this.available_seats = available_seats;
     }
 }

@@ -13,7 +13,7 @@ public class Seat {
 
 
     public int getRow() {
-        return row + 1;
+        return row;
     }
 
     public void setRow(int row) {
@@ -21,7 +21,7 @@ public class Seat {
     }
 
     public int getColumn() {
-        return column + 1;
+        return column;
     }
 
     public void setColumn(int column) {
