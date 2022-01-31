@@ -23,6 +23,9 @@ public class Cinema {
     @JsonIgnore
     private List<Purchase> purchases;
 
+    @JsonIgnore
+    public final String password = "super_secret";
+
     public Cinema() {
     }
 
@@ -72,6 +75,25 @@ public class Cinema {
         }
         return Optional.empty();
     }
+
+    public Statistics generateStatistics() {
+        return new Statistics(getIncome(), (int) getAvailableSeats(), purchases.size());
+    }
+
+    @JsonIgnore
+    public int getIncome() {
+        int total = 0;
+        for (Purchase p : getPurchases()) {
+            total += p.getTicket().getPrice();
+        }
+        return total;
+    }
+
+    @JsonIgnore
+    public long getAvailableSeats() {
+        return seats.values().stream().filter(x -> x.booleanValue() == true).count();
+    }
+
 
     public int getTotal_rows() {
         return total_rows;

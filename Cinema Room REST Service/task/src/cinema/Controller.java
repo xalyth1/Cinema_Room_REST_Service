@@ -55,20 +55,27 @@ public class Controller {
     @PostMapping("/return")
     public ResponseEntity returnTicket(@RequestBody Token token) {
         UUID searchedUUID = token.getToken();
-        
+
         Optional<Purchase> opt = cinema.findByToken(searchedUUID);
         if (opt.isPresent()) {
             Purchase purchase = opt.get();
-
             //remove purchase from purchase list
             cinema.getPurchases().remove(purchase);
             //make seat available in hash map, so new request of get /seats OR post /purchase could be properly serviced
             cinema.getSeats().put(purchase.getTicket(), true);
 
             return new ResponseEntity(Map.of("returned_ticket", purchase.ticket), HttpStatus.OK);
-
         } else {
             return new ResponseEntity(Map.of("error", "Wrong token!"), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/stats")
+    public ResponseEntity statistics(@RequestParam Optional<String> password) {
+        if (password.isEmpty() || !password.get().equals(cinema.password)) {
+            return new ResponseEntity(Map.of("error", "The password is wrong!"), HttpStatus.UNAUTHORIZED);
+        } else {
+            return new ResponseEntity(cinema.generateStatistics(), HttpStatus.OK);
         }
     }
 }
