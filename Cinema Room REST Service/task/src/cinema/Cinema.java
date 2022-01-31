@@ -20,6 +20,9 @@ public class Cinema {
 
     public List<Seat> available_seats;
 
+    @JsonIgnore
+    private List<Purchase> purchases;
+
     public Cinema() {
     }
 
@@ -27,6 +30,7 @@ public class Cinema {
         this.total_rows = rows;
         this.total_columns = columns;
         this.seats = new ConcurrentHashMap<>();
+        this.purchases = new ArrayList<>();
 
         for (int i = 1; i <= total_rows; i++) {
             for (int j = 1; j <= total_columns; j++) {
@@ -54,7 +58,21 @@ public class Cinema {
         }
         return Optional.empty();
     }
-    
+
+    public void addNewPurchase(Purchase purchase) {
+        synchronized (purchases) {
+            purchases.add(purchase);
+        }
+    }
+
+    public Optional<Purchase> findByToken(UUID token) {
+        for (Purchase purchase : getPurchases()) {
+            if (purchase.token.equals(token))
+                return Optional.of(purchase);
+        }
+        return Optional.empty();
+    }
+
     public int getTotal_rows() {
         return total_rows;
     }
@@ -85,5 +103,9 @@ public class Cinema {
 
     public void setSeats(ConcurrentMap<Seat, Boolean> seats) {
         this.seats = seats;
+    }
+
+    public List<Purchase> getPurchases() {
+        return purchases;
     }
 }

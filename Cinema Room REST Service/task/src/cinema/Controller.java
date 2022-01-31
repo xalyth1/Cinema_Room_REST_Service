@@ -7,9 +7,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
-public class Contoller {
+public class Controller {
 
     private final int CINEMA_ROWS = 9;
     private final int CINEMA_COLUMNS = 9;
@@ -23,12 +24,14 @@ public class Contoller {
      */
     @GetMapping("/seats")
     public Cinema getSeats() {
-        cinema.updateAvailableSeats();
+        synchronized (cinema) {
+            cinema.updateAvailableSeats();
+        }
         return cinema;
     }
 
     @PostMapping("/purchase")
-    public ResponseEntity<Seat> purchase(@RequestBody SeatInfo seatInfo) {
+    public ResponseEntity<Purchase> purchase(@RequestBody SeatInfo seatInfo) {
         int row = seatInfo.getRow();
         int column = seatInfo.getColumn();
         Optional<Seat> optional = cinema.getSeat(row, column);
@@ -38,13 +41,34 @@ public class Contoller {
             boolean isAvailable = cinema.seats.get(seat).booleanValue();
             if (isAvailable) {
                 cinema.seats.put(seat, false);
-                return new ResponseEntity<>(seat, HttpStatus.OK);
+                Purchase purchase = new Purchase(seat);
+                cinema.addNewPurchase(purchase);
+                return new ResponseEntity<>(purchase, HttpStatus.OK);
             } else {
                 return new ResponseEntity(Map.of("error", "The ticket has been already purchased!"), HttpStatus.BAD_REQUEST);
             }
         } else {
             return new ResponseEntity(Map.of("error", "The number of a row or a column is out of bounds!"), HttpStatus.BAD_REQUEST);
         }
+    }
 
+    @PostMapping("/return")
+    public ResponseEntity returnTicket(@RequestBody Token token) {
+        UUID searchedUUID = token.getToken();
+        
+        Optional<Purchase> opt = cinema.findByToken(searchedUUID);
+        if (opt.isPresent()) {
+            Purchase purchase = opt.get();
+
+            //remove purchase from purchase list
+            cinema.getPurchases().remove(purchase);
+            //make seat available in hash map, so new request of get /seats OR post /purchase could be properly serviced
+            cinema.getSeats().put(purchase.getTicket(), true);
+
+            return new ResponseEntity(Map.of("returned_ticket", purchase.ticket), HttpStatus.OK);
+
+        } else {
+            return new ResponseEntity(Map.of("error", "Wrong token!"), HttpStatus.BAD_REQUEST);
+        }
     }
 }

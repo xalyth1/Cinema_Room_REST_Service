@@ -1,10 +1,15 @@
 package cinema;
 
+import java.util.Objects;
+import java.util.UUID;
+
 public class Seat implements Comparable<Seat> {
     int row;
     int column;
 
     int price;
+
+    //UUID token;
 
     public Seat() {
     }
@@ -13,6 +18,7 @@ public class Seat implements Comparable<Seat> {
         this.row = rowId;
         this.column = columnId;
         this.price = row <= 4 ? 10 : 8;
+        //this.token = UUID.randomUUID();
     }
 
     public int getRow() {
@@ -44,5 +50,18 @@ public class Seat implements Comparable<Seat> {
         if (this.row == s.row)
             return this.column - s.column;
         else return this.row - s.row;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Seat seat = (Seat) o;
+        return row == seat.row && column == seat.column && price == seat.price;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(row, column, price);
     }
 }
